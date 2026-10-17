@@ -1,0 +1,36 @@
+# User unit template. Copy to ~/.config/systemd/user/wordcut.service and adjust
+# the paths if the checkout is not at ~/wordcut. Without the two LAN settings,
+# Wordcut listens on 127.0.0.1 only.
+[Unit]
+Description=Wordcut local video and waveform editor
+After=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=%h/wordcut
+ExecStart=%h/wordcut/.venv/bin/python %h/wordcut/server.py
+#Environment=WORDCUT_LAN_IP=192.168.1.10
+#Environment=WORDCUT_LAN_NETWORK=192.168.1.0/24
+Restart=on-failure
+RestartSec=5
+MemoryHigh=768M
+MemoryMax=1G
+MemorySwapMax=0
+CPUQuota=200%
+TasksMax=80
+LimitFSIZE=2G
+Nice=10
+OOMScoreAdjust=600
+TimeoutStopSec=8
+KillMode=control-group
+NoNewPrivileges=yes
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=%h/.local/state/wordcut
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+UMask=0077
+
+[Install]
+WantedBy=default.target

@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0b0c0e">
+<title>Wordcut — precise video clips</title>
+<link rel="stylesheet" href="/style.css">
+<script src="/app.js" defer></script>
+</head>
+<body>
+<main>
+
+<header class="topbar">
+  <a class="brand" href="/" aria-label="Wordcut home">
+    <span class="logo" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 12h2M7 8v8M11 5v14M15 9v6M19 11v2" /><path class="cut" d="M13 2v20" /></svg></span>
+    <span class="brand-name">wordcut</span>
+  </a>
+  <span class="status-pill"><i></i>Local workspace</span>
+</header>
+
+<section class="intro">
+  <h1>Cut between the words.</h1>
+  <p>Pick a moment, listen closely, and set the edges in the quiet gaps.</p>
+</section>
+
+<details class="card source-card" id="source-details" open>
+  <summary>
+    <span class="summary-title">Source</span>
+    <span class="summary-hint">Paste a link or choose a different moment</span>
+    <span class="chev" aria-hidden="true"></span>
+  </summary>
+
+  <form id="source-form">
+    <label class="field">
+      <span class="field-label">YouTube link</span>
+      <span class="input-shell">
+        <svg class="input-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1" /></svg>
+        <input id="url" type="url" placeholder="https://www.youtube.com/watch?v=…" required autocomplete="off">
+      </span>
+    </label>
+
+    <div class="span-composer" id="source-span" data-anchor="start">
+      <div class="span-fields">
+        <label class="field time-field" data-edge="start">
+          <span class="field-label">Start <b class="pin" aria-hidden="true"></b></span>
+          <input id="start" type="text" value="0:00" inputmode="decimal" required aria-describedby="time-help" autocomplete="off">
+          <small class="derive" data-derive="start"></small>
+        </label>
+
+        <div class="span-link" aria-hidden="true"><span></span></div>
+
+        <div class="field dur-field">
+          <label class="field-label" for="source-dur">Duration</label>
+          <span class="dur-box">
+            <span class="scrub" title="Drag sideways to adjust · Shift for fine, Alt for coarse" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M8 7l-5 5 5 5M16 7l5 5-5 5" /></svg></span>
+            <input id="source-dur" class="span-dur" type="text" inputmode="decimal" autocomplete="off" placeholder="—" aria-describedby="source-span-note">
+          </span>
+          <small class="derive">↑ ↓ 1 s · drag ⟷ to scrub</small>
+        </div>
+
+        <div class="span-link" aria-hidden="true"><span></span></div>
+
+        <label class="field time-field" data-edge="end">
+          <span class="field-label">End <b class="pin" aria-hidden="true"></b></span>
+          <input id="end" type="text" value="0:28" inputmode="decimal" required aria-describedby="time-help" autocomplete="off">
+          <small class="derive" data-derive="end"></small>
+        </label>
+      </div>
+
+      <div class="span-rail" tabindex="0" role="slider" aria-label="Clip duration" aria-valuemin="0" aria-valuemax="600" aria-valuenow="28">
+        <div class="rail-track"><div class="rail-fill"></div><div class="rail-knob"></div></div>
+        <div class="rail-ticks">
+          <button type="button" tabindex="-1" data-dur="5">5s</button>
+          <button type="button" tabindex="-1" data-dur="15">15s</button>
+          <button type="button" tabindex="-1" data-dur="30">30s</button>
+          <button type="button" tabindex="-1" data-dur="60">1m</button>
+          <button type="button" tabindex="-1" data-dur="120">2m</button>
+          <button type="button" tabindex="-1" data-dur="300">5m</button>
+          <button type="button" tabindex="-1" data-dur="600">10m</button>
+        </div>
+      </div>
+
+      <div class="span-foot">
+        <div class="seg" role="radiogroup" aria-label="Duration anchor">
+          <button type="button" role="radio" data-anchor="start"><span class="seg-icon">⇥</span> From start</button>
+          <button type="button" role="radio" data-anchor="end"><span class="seg-icon">⇤</span> Up to end</button>
+          <i class="seg-thumb" aria-hidden="true"></i>
+        </div>
+        <p class="span-note" id="source-span-note" role="status" aria-live="polite"></p>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <p class="hint" id="time-help"><span class="tag">+1 s</span> padding each side for fine-tuning · M:SS.mmm or H:MM:SS.mmm · up to 10 minutes</p>
+      <button class="primary big" id="prepare" type="submit">Prepare clip <span aria-hidden="true">→</span></button>
+    </div>
+  </form>
+
+  <div class="upload-source">
+    <div>
+      <strong>Or convert a file from your computer</strong>
+      <p>Audio or video · up to 250 MiB and 10 minutes · opens in the waveform editor</p>
+    </div>
+    <label class="file-label"><span>Choose file</span><input id="upload-file" type="file" accept=".mp3,.m4a,.wav,.flac,.ogg,.opus,.aac,.aiff,.aif,.mp4,.mov,.mkv,.webm"></label>
+    <button id="upload-button" type="button">Open &amp; convert</button>
+  </div>
+</details>
+
+<div id="message" role="status" aria-live="polite"></div>
+<section id="progress-card" class="card" hidden>
+  <div><strong id="phase">Preparing…</strong><button id="cancel" class="quiet">Cancel</button></div>
+  <progress id="progress" max="100" value="0"></progress>
+</section>
+
+<section id="editor" hidden>
+  <div class="editor-heading">
+    <div>
+      <div class="eyebrow">Editing</div>
+      <h2 id="title"></h2>
+      <p id="context-info"></p>
+    </div>
+    <span class="badge">1 ms precision</span>
+  </div>
+
+  <div class="preview-row">
+    <div class="preview-media">
+      <video id="video" controls playsinline preload="metadata"></video>
+      <div id="audio-source" hidden><div class="audio-art"><span class="bars" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span><span>Audio converter</span></div><audio id="audio-player" controls preload="metadata"></audio></div>
+    </div>
+    <div class="preview-info">
+      <h3>Listen to the edges.</h3>
+      <p>Drag the <em class="c-in">IN</em> and <em class="c-out">OUT</em> markers into a quiet gap. Zoom in to see the spaces between spoken words.</p>
+      <div class="key-note"><span><kbd>←</kbd><kbd>→</kbd> 1 ms</span><span><kbd>Shift</kbd> + arrow 10 ms</span></div>
+    </div>
+  </div>
+
+  <div class="card wave-card">
+    <div class="wave-toolbar">
+      <div>
+        <button id="play" class="primary">▶ Play selection</button>
+        <button id="stop" class="quiet">■ Stop</button>
+        <label class="inline">Speed<select id="speed"><option value="0.5">0.5×</option><option value="0.75">0.75×</option><option value="1" selected>1×</option></select></label>
+      </div>
+      <div class="zoom">
+        <button id="zoom-out" class="icon" aria-label="Zoom out">−</button>
+        <label class="inline">Zoom<input id="zoom" type="range" min="0" max="100" value="0" aria-label="Waveform zoom"></label>
+        <button id="zoom-in" class="icon" aria-label="Zoom in">+</button>
+        <button id="fit" class="quiet">Fit</button>
+      </div>
+    </div>
+    <div id="wave-wrap">
+      <canvas id="wave" aria-label="Audio waveform; click to seek"></canvas>
+      <div id="selected"><span id="selected-len"></span></div>
+      <button id="in-marker" class="marker in" role="slider" aria-label="Start cut marker" aria-valuemin="0" aria-valuemax="0" aria-valuenow="0"><span>IN</span></button>
+      <button id="out-marker" class="marker out" role="slider" aria-label="End cut marker" aria-valuemin="0" aria-valuemax="0" aria-valuenow="0"><span>OUT</span></button>
+      <div id="playhead"></div>
+    </div>
+    <div class="wave-bottom">
+      <span id="window-label">Full segment</span>
+      <label class="inline">Gain<select id="gain"><option value="1">1×</option><option value="2" selected>2×</option><option value="4">4×</option><option value="8">8×</option></select></label>
+    </div>
+    <label class="pan-label"><span>Scroll</span><input id="pan" type="range" min="0" max="0" step="0.001" value="0"></label>
+  </div>
+
+  <div class="cut-grid">
+    <div class="cut-control in-control">
+      <div class="cut-heading"><label for="cut-in"><i></i>IN</label><button id="focus-in" class="quiet">Focus</button></div>
+      <input id="cut-in" type="text" inputmode="decimal" autocomplete="off">
+      <div class="nudge"><button data-edge="in" data-delta="-0.01">−10</button><button data-edge="in" data-delta="-0.001">−1</button><button data-edge="in" data-delta="0.001">+1</button><button data-edge="in" data-delta="0.01">+10</button></div>
+      <button id="listen-in" class="listen">▶ Hear around IN</button>
+    </div>
+
+    <div class="span-card" id="edit-span" data-anchor="start">
+      <div class="span-card-head"><label for="edit-dur">Length</label><span class="unit">↑↓ · drag ⟷</span></div>
+      <span class="dur-box">
+        <span class="scrub" title="Drag sideways to adjust · Shift for fine, Alt for coarse" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M8 7l-5 5 5 5M16 7l5 5-5 5" /></svg></span>
+        <input id="edit-dur" class="span-dur" type="text" inputmode="decimal" autocomplete="off" placeholder="—" aria-describedby="edit-span-note">
+      </span>
+      <div class="seg" role="radiogroup" aria-label="Length anchor">
+        <button type="button" role="radio" data-anchor="start" title="Keep IN, move OUT">IN ⇥</button>
+        <button type="button" role="radio" data-anchor="end" title="Keep OUT, move IN">⇤ OUT</button>
+        <i class="seg-thumb" aria-hidden="true"></i>
+      </div>
+      <div class="chips">
+        <button type="button" data-dur="1">1s</button><button type="button" data-dur="3">3s</button><button type="button" data-dur="5">5s</button><button type="button" data-dur="10">10s</button><button type="button" data-dur="15">15s</button><button type="button" data-dur="30">30s</button><button type="button" data-dur="60">1m</button>
+      </div>
+      <p class="span-note" id="edit-span-note" role="status" aria-live="polite"></p>
+    </div>
+
+    <div class="cut-control out-control">
+      <div class="cut-heading"><label for="cut-out"><i></i>OUT</label><button id="focus-out" class="quiet">Focus</button></div>
+      <input id="cut-out" type="text" inputmode="decimal" autocomplete="off">
+      <div class="nudge"><button data-edge="out" data-delta="-0.01">−10</button><button data-edge="out" data-delta="-0.001">−1</button><button data-edge="out" data-delta="0.001">+1</button><button data-edge="out" data-delta="0.01">+10</button></div>
+      <button id="listen-out" class="listen">▶ Hear around OUT</button>
+    </div>
+  </div>
+
+  <section class="card transcript-card" aria-labelledby="transcript-heading">
+    <div class="settings-title">
+      <div><div class="eyebrow">Read the words</div><h3 id="transcript-heading">Transcript</h3></div>
+      <button id="transcript-fetch">Extract transcript</button>
+    </div>
+    <p id="transcript-status" class="fine-note" role="status">Extract the video's captions, then highlight any passage to copy.</p>
+    <div id="transcript-controls" hidden>
+      <div class="transcript-toolbar">
+        <label>Caption language<select id="transcript-language" aria-label="Caption language"></select></label>
+        <label>Show<select id="transcript-scope"><option value="clip">Current clip selection</option><option value="full">Full video</option></select></label>
+        <label>Search<input id="transcript-search" type="search" placeholder="Find a word or phrase…" autocomplete="off"></label>
+      </div>
+      <div class="transcript-meta"><label class="check"><input id="transcript-timestamps" type="checkbox"> Include timestamps</label><span id="transcript-count"></span></div>
+      <label class="sr-only" for="transcript-text">Selectable transcript text</label>
+      <textarea id="transcript-text" readonly spellcheck="false" placeholder="No caption lines match this selection or search." aria-describedby="transcript-help"></textarea>
+      <div class="transcript-actions">
+        <button id="transcript-copy-selection" class="primary" disabled>Copy highlighted</button>
+        <button id="transcript-copy-all">Copy shown text</button>
+        <button id="transcript-download">Download .txt</button>
+        <span id="transcript-copy-status" role="status" aria-live="polite"></span>
+      </div>
+      <p class="fine-note" id="transcript-help">Drag across words to highlight, or use Shift + arrow keys. Caption timings are approximate: the clip view includes whole lines that overlap your IN/OUT markers. Use the waveform for precise cuts.</p>
+    </div>
+  </section>
+
+  <section class="card export-settings">
+    <div class="settings-title"><h3>Convert &amp; export</h3><span id="format-description">MP4 · H.264 video + AAC audio</span></div>
+    <div class="settings-grid">
+      <label>Export type<select id="output-mode"><option value="video">Video clip</option><option value="audio">Audio only / converter</option></select></label>
+      <label id="video-format-label">Video format<select id="video-format"><option value="mp4">MP4 — widely compatible</option><option value="mov">MOV — QuickTime</option><option value="mkv">MKV — Matroska</option><option value="webm">WebM — VP9 + Opus</option></select></label>
+      <label id="audio-format-label" hidden>Audio format<select id="audio-format"><option value="mp3">MP3</option><option value="m4a">M4A / AAC</option><option value="wav">WAV / PCM 16-bit</option><option value="flac">FLAC / lossless</option><option value="ogg">Ogg / Vorbis</option><option value="opus">Opus</option></select></label>
+      <label>Filename<input id="output-name" type="text" value="wordcut-clip" maxlength="80"></label>
+    </div>
+    <label class="check"><input id="fade" type="checkbox" checked> Apply audio fades</label>
+    <details id="advanced">
+      <summary>Fine details <span>Quality, resolution, audio, volume &amp; fades</span></summary>
+      <div class="settings-grid advanced-grid">
+        <label data-quality-setting>Encoding quality<select id="quality"><option value="high">High quality</option><option value="balanced">Balanced</option><option value="small">Smaller file</option></select></label>
+        <label data-video-setting>Video resolution<select id="height"><option value="source">Preview size (up to 720p)</option><option value="720">720p maximum</option><option value="480">480p maximum</option><option value="360">360p maximum</option></select></label>
+        <label data-video-setting>Audio track<select id="include-audio"><option value="yes">Include audio</option><option value="no">Silent video</option></select></label>
+        <label data-audio-setting>Audio bitrate<select id="bitrate"><option value="64">64 kbps</option><option value="96">96 kbps</option><option value="128">128 kbps</option><option value="192" selected>192 kbps</option><option value="256">256 kbps</option><option value="320">320 kbps</option></select><small id="bitrate-note"></small></label>
+        <label data-audio-setting>Sample rate<select id="sample-rate"><option value="16000">16 kHz — speech</option><option value="22050">22.05 kHz</option><option value="44100">44.1 kHz</option><option value="48000" selected>48 kHz</option></select></label>
+        <label data-audio-setting>Channels<select id="channels"><option value="source">Keep source channels</option><option value="mono">Mono</option><option value="stereo">Stereo</option></select></label>
+        <label data-audio-setting>Volume (dB)<input id="volume-db" type="number" min="-30" max="12" step="0.5" value="0"><small>Positive gain may clip already loud audio.</small></label>
+        <label data-audio-setting>Fade in (ms)<input id="fade-in" type="number" min="0" max="2000" step="1" value="3"></label>
+        <label data-audio-setting>Fade out (ms)<input id="fade-out" type="number" min="0" max="2000" step="1" value="3"></label>
+      </div>
+      <p class="fine-note">Preview reflects volume and fades. Encoding settings apply on export. WAV and FLAC preserve the available audio; they cannot restore detail lost in the source. Long fades are limited to half the selection.</p>
+    </details>
+    <p id="export-summary" class="fine-note"></p>
+  </section>
+
+  <div class="export-row">
+    <div><span class="eyebrow">Final selection</span><strong id="length">—</strong><small>Audio cuts use milliseconds. Video boundaries follow its frame rate.</small></div>
+    <button id="export" class="primary big">Export MP4 ↓</button>
+  </div>
+  <div id="download-box" hidden><span id="export-info"></span><a id="download" class="primary" download>Download your clip ↓</a></div>
+</section>
+
+<section class="recent-section">
+  <div class="recent-heading"><h2>Recent clips</h2><span>Stored locally for 7 days</span></div>
+  <div id="recent"><p class="muted">No clips yet. Start with a YouTube link above.</p></div>
+</section>
+
+<footer><span>Made for careful listening. Processing stays on this machine.</span><span>Video &amp; audio conversion · No GPU required</span></footer>
+</main>
+</body>
+</html>

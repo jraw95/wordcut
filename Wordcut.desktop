@@ -1,0 +1,14 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Wordcut
+Comment=Trim YouTube clips precisely using an audio waveform
+Exec=wordcut start
+Icon=applications-multimedia
+Terminal=false
+Categories=AudioVideo;Video;
+Actions=Stop;
+
+[Desktop Action Stop]
+Name=Stop Wordcut
+Exec=wordcut stop

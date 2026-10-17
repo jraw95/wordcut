@@ -1,0 +1,9 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Stop Wordcut
+Comment=Stop the local video clipping service
+Exec=wordcut stop
+Icon=process-stop
+Terminal=false
+Categories=AudioVideo;
